@@ -1,0 +1,5 @@
+samples: "wild_hifi.txt"
+
+fiveprime: "GGTAGT"
+
+threeprime: "ACTACC"

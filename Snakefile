@@ -8,7 +8,7 @@
 configfile: "config.yaml"
 
 # Read the samples file into a pandas dataframe
-samples = pd.read_table(config["samples"], header=0).set_index(["sample"], drop=False)
+samples = pd.read_csv(config["samples"], header=0).set_index(["sample"], drop=False)
 
 # function to get the sample name from the wildcards
 def get_reads(wildcards):
