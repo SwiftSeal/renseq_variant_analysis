@@ -1,4 +1,6 @@
-samples: "wild_hifi.txt"
+samples: "samples.csv"
+
+reference: "solanum_verrucosum.fasta"
 
 fiveprime: "GGTAGT"
 

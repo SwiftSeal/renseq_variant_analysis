@@ -4,6 +4,8 @@
 # The aligned reads are sorted and indexed with samtools.
 # Variants are called with gatk HaplotypeCaller.
 
+import pandas as pd
+
 # Import the config file
 configfile: "config.yaml"
 
@@ -52,6 +54,6 @@ rule minimap2:
     conda:
         "envs/variant_analysis.yaml"
     resources:
-        mem_mb=8000
+        mem_mb=16000
     shell:
         """minimap2 -ax map-hifi -t {threads} {input.reference} {input.fq} | samtools sort -@ {threads} -o {output.bam} -"""
