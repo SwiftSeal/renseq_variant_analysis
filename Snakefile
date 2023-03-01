@@ -4,6 +4,9 @@
 # The aligned reads are sorted and indexed with samtools.
 # Variants are called with gatk HaplotypeCaller.
 
+# At some point I need to add a rule to filter the variants with gatk VariantFiltration.
+# But I'm not sure what the best parameters are for that yet.
+
 import pandas as pd
 
 # Import the config file
@@ -74,6 +77,23 @@ rule picard:
         mem_mb=4000
     shell:
         """picard AddOrReplaceReadGroups I={input.bam} O={output.bam} RGID=4 RGLB=lib1 RGPL=pacbio RGPU=unit1 RGSM={wildcards.sample} 2> {log}"""
+
+# This rule indexes the picard bam files for gatk
+rule samtools_index:
+    input:
+        bam="aligned_reads/{sample}_picard.bam"
+    output:
+        bam="aligned_reads/{sample}_picard.bam.bai"
+    log:
+        "logs/samtools_index/{sample}.log"
+    threads:
+        1
+    conda:
+        "envs/variant_analysis.yaml"
+    resources:
+        mem_mb=4000
+    shell:
+        """samtools index {input.bam} {output.bam} 2> {log}"""
 
 rule gatk:
     input:
@@ -149,3 +169,4 @@ rule snpsift_table:
     shell:
         """SnpSift extractFields {input.vcf} "EFF[*].GENE" "EFF[*].EFFECT" "EFF[*].AA" -e "." > {output.table} 2> {log}"""
 
+    
