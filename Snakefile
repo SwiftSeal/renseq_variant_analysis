@@ -55,3 +55,78 @@ rule minimap2:
         mem_mb=8000
     shell:
         """minimap2 -ax map-hifi -t {threads} {input.reference} {input.fq} | samtools sort -@ {threads} -o {output.bam} -"""
+
+rule gatk:
+    input:
+        bam="aligned_reads/{sample}.bam",
+        reference=config["reference"]
+    output:
+        vcf="variants/{sample}.vcf"
+    log:
+        "logs/gatk/{sample}.log"
+    threads:
+        8
+    conda:
+        "envs/variant_analysis.yaml"
+    resources:
+        mem_mb=8000
+    shell:
+        """gatk HaplotypeCaller -R {input.reference} -I {input.bam} -O {output.vcf}"""
+
+# This rule is for annotating the variants with snpEff
+# the snpEff database will need to be generated manually beforehand
+# hardcoded for now
+rule snpeff:
+    input:
+        vcf="variants/{sample}.vcf"
+    output:
+        vcf="annotated_variants/{sample}.vcf"
+    log:
+        "logs/snpeff/{sample}.log"
+    threads:
+        4
+    resources:
+        mem_mb=4000
+    conda:
+        "envs/variant_analysis.yaml"
+    shell:
+        """snpEff solanum_verrucosum {input.vcf} > {output.vcf} 2> {log}"""
+
+# snpsift interval on all nlr genes
+rule snpsift:
+    input:
+        vcf="annotated_variants/{sample}.vcf"
+    output:
+        vcf="annotated_variants/{sample}_nlr.vcf"
+    params:
+        nlr=config["nlr"]
+    log:
+        "logs/snpsift/{sample}.log"
+    threads:
+        4
+    resources:
+        mem_mb=4000
+    conda:
+        "envs/variant_analysis.yaml"
+    shell:
+        """cat {input.vcf} | SnpSift intervals {params.nlr} > {output.vcf} 2> {log}"""
+
+# now make a table of the variants using snpsift extractfields.
+# this will be a tab delimited file with the following columns:
+# CHROM POS REF ALT QUAL FILTER AC AF AN DP
+rule snpsift_table:
+    input:
+        vcf="annotated_variants/{sample}_nlr.vcf"
+    output:
+        table="tables/{sample}_nlr.tsv"
+    log:
+        "logs/snpsift_table/{sample}.log"
+    threads:
+        4
+    resources:
+        mem_mb=4000
+    conda:
+        "envs/variant_analysis.yaml"
+    shell:
+        """SnpSift extractFields {input.vcf} CHROM POS REF ALT QUAL FILTER AC AF AN DP > {output.table} 2> {log}"""
+
