@@ -58,9 +58,26 @@ rule minimap2:
     shell:
         """minimap2 -ax map-hifi -t {threads} {input.reference} {input.fq} | samtools sort -@ {threads} -o {output.bam} -"""
 
+# Need to add picard header to the bam file before gatk processing
+rule picard:
+    input:
+        bam="aligned_reads/{sample}.bam"
+    output:
+        bam="aligned_reads/{sample}_picard.bam"
+    log:
+        "logs/picard/{sample}.log"
+    threads:
+        1
+    conda:
+        "envs/variant_analysis.yaml"
+    resources:
+        mem_mb=4000
+    shell:
+        """picard AddOrReplaceReadGroups I={input.bam} O={output.bam} RGID=4 RGLB=lib1 RGPL=pacbio RGPU=unit1 RGSM={wildcards.sample} 2> {log}"""
+
 rule gatk:
     input:
-        bam="aligned_reads/{sample}.bam",
+        bam="aligned_reads/{sample}_picard.bam",
         reference=config["reference"]
     output:
         vcf="variants/{sample}.vcf"
