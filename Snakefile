@@ -18,7 +18,7 @@ def get_reads(wildcards):
 
 rule all:
     input:
-        expand("aligned_reads/{sample}.bam", sample=samples["sample"])
+        expand("tables/{sample}_nlr.tsv", sample=samples["sample"])
 
 rule cutadapt:
     input:
@@ -27,7 +27,7 @@ rule cutadapt:
         fiveprime=config["fiveprime"],
         threeprime=config["threeprime"]
     output:
-        fq=temp("trimmed_reads/{sample}.fq"),
+        fq="trimmed_reads/{sample}.fq",
         intermediate=temp("trimmed_reads/{sample}_intermediate.fq")
     log:
         "logs/cutadapt/{sample}.log"
