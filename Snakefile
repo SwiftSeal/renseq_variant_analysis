@@ -67,7 +67,7 @@ rule gatk:
     log:
         "logs/gatk/{sample}.log"
     threads:
-        8
+        4
     conda:
         "envs/variant_analysis.yaml"
     resources:
@@ -77,7 +77,7 @@ rule gatk:
 
 # This rule is for annotating the variants with snpEff
 # the snpEff database will need to be generated manually beforehand
-# hardcoded for now
+# hardcoded for now, but could be changed to use the config file
 rule snpeff:
     input:
         vcf="variants/{sample}.vcf"
@@ -92,7 +92,7 @@ rule snpeff:
     conda:
         "envs/variant_analysis.yaml"
     shell:
-        """snpEff solanum_verrucosum {input.vcf} > {output.vcf} 2> {log}"""
+        """snpEff solanum_verrucosum {input.vcf} -o gatk > {output.vcf} 2> {log}"""
 
 # snpsift interval on all nlr genes
 rule snpsift:
@@ -115,7 +115,7 @@ rule snpsift:
 
 # now make a table of the variants using snpsift extractfields.
 # this will be a tab delimited file with the following columns:
-# CHROM POS REF ALT QUAL FILTER AC AF AN DP
+# GENEID EFFECT AA
 rule snpsift_table:
     input:
         vcf="annotated_variants/{sample}_nlr.vcf"
@@ -130,5 +130,5 @@ rule snpsift_table:
     conda:
         "envs/variant_analysis.yaml"
     shell:
-        """SnpSift extractFields {input.vcf} CHROM POS REF ALT QUAL FILTER AC AF AN DP > {output.table} 2> {log}"""
+        """SnpSift extractFields {input.vcf} "EFF[*].GENE" "EFF[*].EFFECT" "EFF[*].AA" -e "." > {output.table} 2> {log}"""
 
