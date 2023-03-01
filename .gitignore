@@ -1,0 +1,7 @@
+*.out
+*.fasta
+*.csv
+aligned_reads/
+trimmed_reads/
+logs/
+.snakemake/

@@ -1,0 +1,7 @@
+samples: "samples.csv"
+
+reference: "solanum_verrucosum.fasta"
+
+fiveprime: "GGTAGT"
+
+threeprime: "ACTACC"

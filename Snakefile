@@ -4,11 +4,13 @@
 # The aligned reads are sorted and indexed with samtools.
 # Variants are called with gatk HaplotypeCaller.
 
+import pandas as pd
+
 # Import the config file
 configfile: "config.yaml"
 
 # Read the samples file into a pandas dataframe
-samples = pd.read_table(config["samples"], header=0).set_index(["sample"], drop=False)
+samples = pd.read_csv(config["samples"], header=0).set_index(["sample"], drop=False)
 
 # function to get the sample name from the wildcards
 def get_reads(wildcards):
@@ -52,7 +54,7 @@ rule minimap2:
     conda:
         "envs/variant_analysis.yaml"
     resources:
-        mem_mb=8000
+        mem_mb=16000
     shell:
         """minimap2 -ax map-hifi -t {threads} {input.reference} {input.fq} | samtools sort -@ {threads} -o {output.bam} -"""
 

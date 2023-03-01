@@ -1,0 +1,9 @@
+channels:
+ - bioconda
+dependencies:
+ - minimap2
+ - samtools
+ - cutadapt
+ - gatk4
+ - snpeff
+ - snpsift
